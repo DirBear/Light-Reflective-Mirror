@@ -54,10 +54,10 @@ namespace LightReflectiveMirror.LoadBalancing
             else
             {
                 conf = new Config();
-                conf.ConnectedServerPingRate  = Environment.GetEnvironmentVariable("CONNECTED_SERVER_PING_RATE") ?? "10000";
+                conf.ConnectedServerPingRate  = int.Parse(Environment.GetEnvironmentVariable("CONNECTED_SERVER_PING_RATE") ?? "10000");
                 conf.AuthKey  = Environment.GetEnvironmentVariable("AUTH_KEY") ?? "Secret Auth Key";
                 conf.EndpointPort  = ushort.Parse(Environment.GetEnvironmentVariable("ENDPOINT_PORT") ?? "8080");
-                conf.ShowDebugLogs  = int.Parse(Environment.GetEnvironmentVariable("SHOW_DEBUG_LOGS") ?? "true");
+                conf.ShowDebugLogs  = bool.parse(Environment.GetEnvironmentVariable("SHOW_DEBUG_LOGS") ?? "true");
                 conf.RandomlyGeneratedIDLength  = int.Parse(Environment.GetEnvironmentVariable("RANDOMLY_GENERATED_ID_LENGTH") ?? "5");
             }
 
