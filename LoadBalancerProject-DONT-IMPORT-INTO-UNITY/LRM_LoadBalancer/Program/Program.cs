@@ -36,6 +36,7 @@ namespace LightReflectiveMirror.LoadBalancing
 
             instance = this;
             startupTime = DateTime.Now;
+            bool noConfig = bool.Parse(Environment.GetEnvironmentVariable("NO_CONFIG") ?? "false");
             if (!noConfig)
             {
                 if (!File.Exists(CONFIG_PATH))
