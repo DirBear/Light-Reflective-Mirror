@@ -5,6 +5,9 @@ services:
         restart: unless-stopped
         depends_on:
             - load_balancer
+        networks:
+            subs:
+                ipv4_address: 10.5.0.2
 
     load_balancer:
         container_name: ${COMPOSE_PROJECT_NAME}_load_balancer
@@ -13,9 +16,12 @@ services:
         ports:
             - "8080:8080"
         networks:
-            app_net:
+            subs:
                 ipv4_address: 10.5.0.2
-ipam:
-    driver: default
-    config:
-        - subnet: 10.5.0.0/16
+
+networks:
+    subs:
+        driver: default
+        ipam:
+            config:
+            - subnet: 10.5.0.0/16
