@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS builder
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
 WORKDIR /lrm-lb
 COPY . .
-RUN RUN dotnet publish LRM_LoadBalancer.sln -c Release -o /out
+RUN dotnet publish LRM_LoadBalancer.sln -c Release -o /out
 
 # Creating the server container
 FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine
@@ -13,11 +13,12 @@ WORKDIR /var/load-balancer
 
 ENV NO_CONFIG="true"
 ENV CONNECTED_SERVER_PING_RATE="10000"
-ENV AUTH_KEY=""
+ENV AUTH_KEY="${API_KEY}"
 ENV ENDPOINT_PORT="8080"
 ENV SHOW_DEBUG_LOGS="true"
 ENV RANDOMLY_GENERATED_ID_LENGTH="5"
 
 EXPOSE ${ENDPOINT_PORT}
 
-ENTRYPOINT ["/var/server/LRM_LoadBalancer"]
+
+ENTRYPOINT ["/var/load-balancer/LRM_LoadBalancer"]

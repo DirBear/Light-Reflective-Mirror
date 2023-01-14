@@ -36,27 +36,39 @@ namespace LightReflectiveMirror.LoadBalancing
 
             instance = this;
             startupTime = DateTime.Now;
-
-            if (!File.Exists(CONFIG_PATH))
+            if (!noConfig)
             {
-                File.WriteAllText(CONFIG_PATH, JsonConvert.SerializeObject(new Config(), Formatting.Indented));
-                Logger.ForceLogMessage("A config.json file was generated. Please configure it to the proper settings and re-run!", ConsoleColor.Yellow);
-                Console.ReadKey();
-                Environment.Exit(0);
+                if (!File.Exists(CONFIG_PATH))
+                {
+                    File.WriteAllText(CONFIG_PATH, JsonConvert.SerializeObject(new Config(), Formatting.Indented));
+                    Logger.ForceLogMessage("A config.json file was generated. Please configure it to the proper settings and re-run!", ConsoleColor.Yellow);
+                    Console.ReadKey();
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    conf = JsonConvert.DeserializeObject<Config>(File.ReadAllText(CONFIG_PATH));
+                }
             }
             else
             {
-                conf = JsonConvert.DeserializeObject<Config>(File.ReadAllText(CONFIG_PATH));
-                Logger.ConfigureLogger(new Logger.LogConfiguration { sendLogs = conf.ShowDebugLogs });
-
-                _pingDelay = conf.ConnectedServerPingRate;
-                showDebugLogs = conf.ShowDebugLogs;
-
-                if (new EndpointServer().Start(conf.EndpointPort))
-                    Logger.ForceLogMessage("Endpoint server started successfully", ConsoleColor.Green);
-                else
-                    Logger.ForceLogMessage("Endpoint server started unsuccessfully", ConsoleColor.Red);
+                conf = new Config();
+                conf.ConnectedServerPingRate  = Environment.GetEnvironmentVariable("CONNECTED_SERVER_PING_RATE") ?? "10000";
+                conf.AuthKey  = Environment.GetEnvironmentVariable("AUTH_KEY") ?? "Secret Auth Key";
+                conf.EndpointPort  = ushort.Parse(Environment.GetEnvironmentVariable("ENDPOINT_PORT") ?? "8080");
+                conf.ShowDebugLogs  = int.Parse(Environment.GetEnvironmentVariable("SHOW_DEBUG_LOGS") ?? "true");
+                conf.RandomlyGeneratedIDLength  = int.Parse(Environment.GetEnvironmentVariable("RANDOMLY_GENERATED_ID_LENGTH") ?? "5");
             }
+
+            Logger.ConfigureLogger(new Logger.LogConfiguration { sendLogs = conf.ShowDebugLogs });
+
+            _pingDelay = conf.ConnectedServerPingRate;
+            showDebugLogs = conf.ShowDebugLogs;
+
+            if (new EndpointServer().Start(conf.EndpointPort))
+                Logger.ForceLogMessage("Endpoint server started successfully", ConsoleColor.Green);
+            else
+                Logger.ForceLogMessage("Endpoint server started unsuccessfully", ConsoleColor.Red);
 
             var pingThread = new Thread(new ThreadStart(PingServers));
             pingThread.Start();

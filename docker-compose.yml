@@ -2,26 +2,13 @@ version: "3.3"
 services:
     server:
         build: ./ServerProject-DONT-IMPORT-INTO-UNITY
-        restart: always
-        networks:
-            vpcbr:
+        restart: unless-stopped
         depends_on:
             - load_balancer
-            
+
     load_balancer:
+        container_name: ${COMPOSE_PROJECT_NAME}_load_balancer
         build: ./LoadBalancerProject-DONT-IMPORT-INTO-UNITY
-        restart: always
-        networks:
-            vpcbr:
-                ipv4_address: 10.5.0.2
-        port:
-            - "7070:7070"
-
-
-networks:
-    vpcbr:
-        driver: bridge
-        ipam:
-            config:
-                - subnet: 10.5.0.0/16
-                  gateway: 10.5.0.1
+        restart: unless-stopped
+        ports:
+            - "8080:8080"
