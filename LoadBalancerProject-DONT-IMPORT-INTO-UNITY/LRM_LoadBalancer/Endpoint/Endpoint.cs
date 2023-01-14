@@ -232,18 +232,20 @@ namespace LightReflectiveMirror.LoadBalancing
                 .SetBasePath(System.IO.Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
-               bool noConfig = bool.Parse(Environment.GetEnvironmentVariable("NO_CONFIG") ?? "false");
+                
+                bool noConfig = bool.Parse(Environment.GetEnvironmentVariable("NO_CONFIG") ?? "false");
 
                 var server = new RestServerBuilder(new ServiceCollection(), config,
-                (services) =>
+                (services) => {
+                    services.AddLogging(configure => configure.AddConsole());
                     services.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.None);
                 }, (server) =>
                 {
                     if (!noConfig)
                     {
-                        var ipOvveride = Environment.GetEnvironmentVariable("IP") ?? "";
-                        if ( ipOvveride != "")
-                            server.Prefixes.Add($"http://{ipOvveride}:{port}/");
+                        var ipOvr = Environment.GetEnvironmentVariable("IP") ?? "";
+                        if ( ipOvr != "")
+                            server.Prefixes.Add($"http://{ipOvr}:{port}/");
                     }
                     foreach (string ip in GetLocalIps())
                         server.Prefixes.Add($"http://{ip}:{port}/");
