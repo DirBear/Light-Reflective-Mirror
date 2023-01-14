@@ -1,0 +1,27 @@
+version: "3.3"
+services:
+    server:
+        build: ./ServerProject-DONT-IMPORT-INTO-UNITY
+        restart: always
+        networks:
+            vpcbr:
+        depends_on:
+            - load_balancer
+            
+    load_balancer:
+        build: ./LoadBalancerProject-DONT-IMPORT-INTO-UNITY
+        restart: always
+        networks:
+            vpcbr:
+                ipv4_address: 10.5.0.2
+        port:
+            - "7070:7070"
+
+
+networks:
+    vpcbr:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.5.0.0/16
+                  gateway: 10.5.0.1

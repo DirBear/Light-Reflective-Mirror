@@ -1,15 +1,23 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS builder
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS builder
 WORKDIR /lrm-lb
 COPY . .
-ARG BUILD_MODE="Release"
-RUN dotnet publish \
-    --output /build/ \
-    --configuration $BUILD_MODE \
-    --no-self-contained .
+RUN RUN dotnet publish LRM_LoadBalancer.sln -c Release -o /out
 
-FROM mcr.microsoft.com/dotnet/runtime:5.0-alpine
-WORKDIR /lrm-lb
-COPY --from=builder /build/ .
-ENV LRM_LB_CONFIG_PATH="/config/config-load-balancer.json"
-CMD [ "./LRM_LoadBalancer" ]
-ENTRYPOINT [ "./LRM_LoadBalancer"]
+# Creating the server container
+FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine
+
+# Copying builded files
+COPY --from=build /out/ /var/load-balancer
+
+WORKDIR /var/load-balancer
+
+ENV NO_CONFIG="true"
+ENV CONNECTED_SERVER_PING_RATE="10000"
+ENV AUTH_KEY=""
+ENV ENDPOINT_PORT="8080"
+ENV SHOW_DEBUG_LOGS="true"
+ENV RANDOMLY_GENERATED_ID_LENGTH="5"
+
+EXPOSE ${ENDPOINT_PORT}
+
+ENTRYPOINT ["/var/server/LRM_LoadBalancer"]
