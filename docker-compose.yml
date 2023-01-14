@@ -12,3 +12,10 @@ services:
         restart: unless-stopped
         ports:
             - "8080:8080"
+        networks:
+            app_net:
+                ipv4_address: 10.5.0.2
+ipam:
+    driver: default
+    config:
+        - subnet: 10.5.0.0/16
